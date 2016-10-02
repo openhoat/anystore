@@ -6,4 +6,4 @@ services: redis-server
 
 before_script: npm i
 
-script: npm test
+script: npm test --coverage
