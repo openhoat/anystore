@@ -37,7 +37,7 @@ Look at the examples in optionalDependencies of [package.json](https://github.co
 
 Create an entity and get it back : [example1](https://github.com/openhoat/anystore/tree/master/samples/example1.js)
 
-```
+```javascript
 const Anystore = require('anystore');
 
 const store = new Anystore.stores.MemoryStore(); // Default memory store provided for test purpose
