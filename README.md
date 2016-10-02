@@ -1,4 +1,4 @@
-[![NPM version](https://badge.fury.io/js/hw-store.svg)](http://badge.fury.io/js/anystore)
+[![NPM version](https://badge.fury.io/js/anystore.svg)](http://badge.fury.io/js/anystore)
 [![Build Status](https://travis-ci.org/openhoat/anystore.png?branch=master)](https://travis-ci.org/openhoat/anystore)
 [![Coverage Status](https://coveralls.io/repos/openhoat/anystore/badge.svg)](https://coveralls.io/r/openhoat/anystore)
 [![npm](https://img.shields.io/npm/l/express.svg?style=flat-square)]()
