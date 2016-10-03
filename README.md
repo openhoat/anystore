@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/openhoat/anystore/badge.svg)](https://coveralls.io/r/openhoat/anystore)
 [![npm](https://img.shields.io/npm/l/express.svg?style=flat-square)]()
 
-![Datastore Logo](assets/img/datastore-logo.png)
+![Datastore Logo](assets/img/logo-anystore-100.png)
 
 ## Anystore
 
