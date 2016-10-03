@@ -4,7 +4,7 @@
         "description": "Agnostic data persistence for nodejs",
         "version": "0.0.1",
         "url": "https://github.com/openhoat/anystore",
-        "logo": "https://github.com/openhoat/anystore/raw/master/assets/img/datastore-logo.png"
+        "logo": "https://github.com/openhoat/anystore/raw/master/assets/img/logo-anystore-48.png"
     },
     "files": {
         "docs/assets/vendor/bootstrap/js/bootstrap.min.js": {
