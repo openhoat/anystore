@@ -1,6 +1,6 @@
 {
   "name": "anystore",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Agnostic data persistence for nodejs",
   "main": "lib/anystore.js",
   "scripts": {
