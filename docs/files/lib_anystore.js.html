@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>lib/anystore.js - anystore</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="anystore" src="https://github.com/openhoat/anystore/raw/master/assets/img/datastore-logo.png" style="max-height: 65%;" title="anystore">
+            anystore
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>0.0.1</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Anystore"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Anystore.html">Anystore</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
+        </div>
+        <div class="span9">
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>lib/anystore.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+&#x27;use strict&#x27;;
+
+const path = require(&#x27;path&#x27;);
+const fs = require(&#x27;fs&#x27;);
+const _ = require(&#x27;lodash&#x27;);
+const Promise = require(&#x27;bluebird&#x27;);
+const traverse = require(&#x27;traverse&#x27;);
+const jsonSchema = require(&#x27;jsonschema&#x27;);
+const uuid = require(&#x27;uuid&#x27;);
+const AnystoreError = require(&#x27;./anystore-error&#x27;);
+const logger = require(&#x27;hw-logger&#x27;);
+const log = logger.log;
+
+class Anystore {
+  /**
+   * Base class of any store.
+   *
+   * @class Anystore
+   * @constructor
+   * @param [opt] {Object} Anystore options
+   */
+  constructor(opt) {
+    opt = opt || {};
+    _.defaults(this, _.pick(opt, [&#x27;schemas&#x27;]));
+    this._computeSchema();
+  }
+
+  /**
+   * Optionnal initialization.
+   * Use it to pass optional options to the store implementation, like host, port, ... for example.
+   *
+   * @method init
+   * @param [opt] {Object} Store implementation options
+   * @return {Boolean} true on success
+   */
+  init(opt) {
+    const result = typeof this._init === &#x27;function&#x27;
+      ? this._init(opt &amp;&amp; _.clone(opt) || {})
+      : true;
+    this.initialized = true;
+    return result;
+  }
+
+  /**
+   * Start the store.
+   *
+   * @async
+   * @method start
+   * @param [opt] {Object} Store implementation options
+   * @param [cb] {Function} Callback function
+   * @return {Promise} true on success
+   */
+  start(opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (!this.initialized) {
+          this.init(opt);
+        }
+        if (this.started) {
+          return false;
+        }
+        return Promise.resolve()
+          .then(() =&gt; {
+            if (!this.initialized) {
+              this.init(opt);
+            }
+            if (typeof this._start === &#x27;function&#x27;) {
+              return this._start();
+            }
+          })
+          .then(() =&gt; {
+            this.started = true;
+            logger.enabledLevels.info &amp;&amp; log.info(&#x60;${this.name} sucessfully started&#x60;);
+            return true;
+          });
+      })
+      .asCallback(cb);
+  }
+
+  /**
+   * Stop the store.
+   *
+   * @async
+   * @method stop
+   * @param [cb] {Function} Callback function
+   * @return {Promise} true on success
+   */
+  stop(cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (!this.started) {
+          return false;
+        }
+        return Promise.resolve()
+          .then(() =&gt; {
+            if (typeof this._stop === &#x27;function&#x27;) {
+              return this._stop();
+            }
+          })
+          .then(() =&gt; {
+            logger.enabledLevels.info &amp;&amp; log.info(&#x60;${this.name} closed&#x60;);
+            return true;
+          });
+      })
+      .asCallback(cb);
+  }
+
+  _computeSchema() {
+    if (!this.schemas) {
+      return;
+    }
+    const rels = {};
+    this.validator = new jsonSchema.Validator();
+    this.validator.addSchema(Anystore.idSchema, &#x27;/Id&#x27;);
+    for (const schema of this.schemas) {
+      if (_.get(schema, &#x27;properties.id&#x27;)) {
+        this.validator.addSchema(Anystore.idSchema, &#x27;/Id&#x27; + schema.id);
+      }
+      const jsonSchema = Object.assign({}, _.omit(schema, &#x27;id&#x27;), {id: &#x60;/${schema.id}&#x60;});
+      jsonSchema.properties = jsonSchema.properties || {};
+      jsonSchema.$update = _.defaults(jsonSchema.$update, {
+        required: [&#x27;id&#x27;],
+        minProperties: 2
+      });
+      Object.assign(jsonSchema.properties, {id: {$ref: &#x27;/Id&#x27;}});
+      this.validator.addSchema(jsonSchema, jsonSchema.id);
+      traverse(schema).forEach(function(item) {
+        const type = schema.id;
+        rels[type] = rels[type] || {indexes: [], links: {}};
+        if (this.key === &#x27;$target&#x27;) {
+          const key = this.path[1];
+          const links = rels[type].links;
+          links[key] = links[key] || {};
+          const link = links[key];
+          link[_.get(schema, this.path.slice(0, 2)).type === &#x27;array&#x27; ? &#x27;hasMany&#x27; : &#x27;hasOne&#x27;] = true;
+          link.target = item;
+          const as = _.get(schema, this.parent.path).$as;
+          if (as) {
+            link.as = as;
+          }
+        } else if (this.key === &#x27;$unique&#x27;) {
+          const indexes = rels[type].indexes;
+          const key = this.parent.key;
+          if (indexes.indexOf(key) === -1) {
+            indexes.push({name: key, unique: true});
+          }
+        } else if (this.key === &#x27;$uniqueWith&#x27;) {
+          const indexes = rels[type].indexes;
+          const index = [this.parent.key, item];
+          if (!indexes
+              .reduce((notFound, existingIndex) =&gt; {
+                if (!Array.isArray(existingIndex.name)) {
+                  return false;
+                }
+                return (index.length === existingIndex.name.length) &amp;&amp; index
+                    .every((e, i) =&gt; existingIndex.name.indexOf(e) !== -1);
+              }, false)) {
+            indexes.push({name: [this.parent.key, item], unique: true});
+          }
+        } else if (this.key === &#x27;$index&#x27;) {
+          const indexes = rels[type].indexes;
+          const key = this.parent.key;
+          if (indexes.indexOf(key) === -1) {
+            indexes.push({name: key});
+          }
+        }
+      });
+    }
+    for (const type in rels) {
+      const typeRel = rels[type];
+      for (const key in typeRel) {
+        const itemRel = typeRel[key];
+        if (itemRel.target) {
+          if (!rels[itemRel.target]) {
+            throw new AnystoreError.SchemaValidation(
+              &#x60;Error in &quot;${type}&quot; schema : target &quot;${itemRel.target}&quot; does not exist&#x60;);
+          }
+          if (itemRel.as) {
+            if (!rels[itemRel.target][itemRel.as]) {
+              throw new AnystoreError.SchemaValidation(
+                &#x60;Error in &quot;${type}&quot; schema : target &quot;${itemRel.target}.${itemRel.as}&quot; does not exist&#x60;);
+            }
+          }
+        } else {
+          if (itemRel.as) {
+            throw new AnystoreError.SchemaValidation(
+              &#x60;Error in &quot;${type}&quot; schema : missing target with as attribute&#x60;);
+          }
+        }
+      }
+    }
+    this.schemaRelations = rels;
+  }
+
+  _applyImpl(fnName, ...args) {
+    const implFn = this.impl[&#x60;_${fnName}&#x60;];
+    if (typeof implFn !== &#x27;function&#x27;) {
+      throw new AnystoreError
+        .NotImplemented(&#x60;method &quot;${fnName}&quot; not implemented in store implementation &quot;${this.impl.name}&quot;&#x60;);
+    }
+    return implFn(...args);
+  }
+
+  /**
+   * Get schema relations.
+   *
+   * @method getSchemaRelations
+   * @return {Object} Schema relation
+   */
+  getSchemaRelations() {
+    return this.schemaRelations;
+  }
+
+  /**
+   * Validate entity data.
+   *
+   * @async
+   * @method validate
+   * @param type {String} Entity type reference
+   * @param data {Object} Store implementation options
+   * @param [mode=create] {String} Specify operation to use in schema
+   * @param [cb] {Function} Callback function
+   * @return {Promise} fails on validation error
+   */
+  validate(type, data, mode = &#x27;create&#x27;, cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (typeof data !== &#x27;object&#x27; || !data) {
+          throw new AnystoreError.MissingArgument(&#x27;missing data&#x27;);
+        }
+        if (!this.validator) {
+          return;
+        }
+        const schema = this.validator.getSchema(&#x60;/${type}&#x60;);
+        if (!schema) {
+          throw new AnystoreError.SchemaValidation(&#x60;schema not found for &quot;${type}&quot;&#x60;);
+        }
+        return Promise.resolve()
+          .then(() =&gt; {
+            const modeSchema = _.chain(schema).omit([&#x27;$create&#x27;, &#x27;$update&#x27;]).assign(schema[&#x60;$${mode}&#x60;]).value();
+            const defaults = Object.keys(modeSchema.properties)
+              .filter(name =&gt; typeof modeSchema.properties[name].default !== &#x27;undefined&#x27;)
+              .reduce((o, name) =&gt; Object.assign(o, {[name]: modeSchema.properties[name].default}), {});
+            _.defaults(data, defaults);
+            this.validator.schemas[schema.id] = modeSchema;
+            const validation = this.validator.validate(data, type);
+            if (!validation.valid) {
+              logger.enabledLevels.debug &amp;&amp; log.debug(&#x27;validation :&#x27;, JSON.stringify(validation, null, 2));
+              throw new AnystoreError.SchemaValidation(&#x27;bad data format&#x27;, validation.errors);
+            }
+            return Promise.resolve()
+              .then(() =&gt; {
+                const indexes = this.getIndexes(type, data);
+                return Promise.each(indexes, index =&gt; {
+                  if (!index.unique) {
+                    return;
+                  }
+                  const indexValue = Array.isArray(index.name)
+                    ? index.name.map(key =&gt; data[key])
+                    : data[index.name];
+                  return this.findByIndex(type, index.name, indexValue)
+                    .then(list =&gt; {
+                      if ((data.id ? list.filter(item =&gt; item.id !== data.id) : list).length) {
+                        throw new AnystoreError
+                          .Conflict(&#x60;${type}.${index.name} already exists with value &quot;${indexValue}&quot;&#x60;);
+                      }
+                    });
+                });
+              });
+          })
+          .catch(jsonSchema.SchemaError, err =&gt; {
+            throw new AnystoreError.SchemaValidation(err);
+          })
+          .finally(() =&gt; {
+            this.validator.schemas[schema.id] = schema;
+          });
+      })
+      .asCallback(cb);
+  }
+
+  getIndexes(type, data) {
+    return (this.schemaRelations[type].indexes || [])
+      .filter(index =&gt; !data || (Array.isArray(index.name)
+        ? index.name.reduce((ok, indexName) =&gt; ok &amp;&amp; typeof data[indexName] !== &#x27;undefined&#x27;, true)
+        : typeof data[index.name] !== &#x27;undefined&#x27;)
+      );
+  }
+
+  getLinks(type, data) {
+    const links = this.schemaRelations[type] &amp;&amp; this.schemaRelations[type].links || {};
+    return Object.keys(links).reduce((list, name) =&gt; {
+      const value = links[name];
+      if (value &amp;&amp; (!data || typeof data[name] !== &#x27;undefined&#x27;)) {
+        list.push({name, value});
+      }
+      return list;
+    }, []);
+  }
+
+  unsetRelations(type, data, cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (!this.validator) {
+          return;
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;removing relations for ${type}#${data.id}&#x60;);
+        if (typeof this._unsetRelations === &#x27;function&#x27;) {
+          return this._unsetRelations(type, data);
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;removing links for ${type}#${data.id}&#x60;);
+        return Promise.each(this.getLinks(type, data), link =&gt; Promise.resolve()
+          .then(() =&gt; this._load(link.value.target, data[link.name]))
+          .then(rData =&gt; {
+            if (link.value.hasMany) {
+              const index = rData[link.value.as].indexOf(data.id);
+              if (index !== -1) {
+                rData[link.value.as].splice(index, 1);
+              }
+            } else if (link.value.hasOne) {
+              delete rData[link.value.as];
+            }
+            return this.update(type, rData, {cascade: false});
+          })
+        );
+      })
+      .return(data)
+      .asCallback(cb);
+  }
+
+  setRelations(type, data, cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (!this.validator) {
+          return;
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;setting relations for ${type}#${data.id}&#x60;);
+        if (typeof this._setRelations === &#x27;function&#x27;) {
+          return this._setRelations(type, data);
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;setting links for ${type}#${data.id}&#x60;);
+        return Promise.each(this.getLinks(type, data), link =&gt; Promise.resolve()
+          .then(() =&gt; this._load(link.value.target, data[link.name]))
+          .then(rData =&gt; {
+            if (link.value.hasMany) {
+              rData[link.value.as] = rData[link.value.as] || [];
+              rData[link.value.as].push(data.id);
+            } else if (link.value.hasOne) {
+              rData[link.value.as] = data.id;
+            }
+            return this.update(type, rData, {cascade: false});
+          })
+        );
+      })
+      .return(data)
+      .asCallback(cb);
+  }
+
+  omitLinks(type, data) {
+    const links = this.getLinks(type, data);
+    return links.length ? _.omit(data, _.map(links, &#x27;name&#x27;)) : data;
+  }
+
+  load(type, id, opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    opt.links = typeof opt.links === &#x27;undefined&#x27; || opt.links;
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (typeof id !== &#x27;string&#x27;) {
+          throw new AnystoreError.MissingArgument(&#x27;missing id&#x27;);
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;loading ${type}#${id}&#x60;);
+        return this._load(type, id, opt);
+      })
+      .asCallback(cb);
+  }
+
+  create(type, data, opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    opt.cascade = typeof opt.cascade === &#x27;undefined&#x27; || opt.cascade;
+    data = _.cloneDeep(data);
+    logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;creating new ${type}&#x60;);
+    return Promise.resolve()
+      .then(() =&gt; this.validate(type, data, &#x27;create&#x27;))
+      .then(() =&gt; {
+        data.id = data.id || uuid.v4();
+      })
+      .then(() =&gt; this._create(type, data, opt))
+      .then(newData =&gt; Promise.resolve()
+        .then(() =&gt; {
+          if (!opt.cascade) {
+            return;
+          }
+          return this.setRelations(type, newData);
+        })
+        .return(newData)
+      )
+      .asCallback(cb);
+  }
+
+  update(type, data, opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    opt.cascade = typeof opt.cascade === &#x27;undefined&#x27; || opt.cascade;
+    return Promise.resolve()
+      .then(() =&gt; this.validate(type, data, &#x27;update&#x27;))
+      .then(() =&gt; {
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;updating ${type}#${data.id}&#x60;);
+        if (typeof this._update !== &#x27;function&#x27;) {
+          return Promise.resolve()
+            .then(() =&gt; this.delete(type, data.id, opt))
+            .then(existingData =&gt; this.create(type, _.extend({}, existingData, data), opt));
+        }
+        return Promise.resolve()
+          .then(() =&gt; {
+            if (!opt.cascade) {
+              return;
+            }
+            return Promise.resolve()
+              .then(() =&gt; this._load(type, data.id))
+              .then(existingData =&gt; this.unsetRelations(type, existingData));
+          })
+          .then(() =&gt; this._update(type, data, opt))
+          .then(newData =&gt; {
+            if (!opt.cascade) {
+              return;
+            }
+            return this.setRelations(type, newData);
+          });
+      })
+      .asCallback(cb);
+  }
+
+  delete(type, id, opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    opt.cascade = typeof opt.cascade === &#x27;undefined&#x27; || opt.cascade;
+    return Promise.resolve()
+      .then(() =&gt; {
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;deleting ${type}#${id}&#x60;);
+        if (typeof id !== &#x27;string&#x27;) {
+          throw new AnystoreError.MissingArgument(&#x27;missing id&#x27;);
+        }
+        if (!opt.cascade) {
+          return;
+        }
+        return Promise.resolve()
+          .then(() =&gt; this._load(type, id))
+          .then(existingData =&gt; this.unsetRelations(type, existingData));
+      })
+      .then(() =&gt; this._delete(type, id, opt))
+      .asCallback(cb);
+  }
+
+  findByIndex(type, indexName, indexValue, cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;searching ${type} items with ${indexName}: &quot;${indexValue}&quot;&#x60;);
+        if (typeof this._findByIndex === &#x27;function&#x27;) {
+          return this._findByIndex(type, indexName, indexValue);
+        }
+        return this.listOfType(type)
+          .filter(item =&gt; {
+            if (Array.isArray(indexName)) {
+              return indexName.reduce((found, key, index) =&gt; found &amp;&amp; item[key] === indexValue[index], true);
+            } else {
+              return item[indexName] === indexValue;
+            }
+          });
+      })
+      .asCallback(cb);
+  }
+
+  listOfType(type, opt, cb) {
+    if (typeof cb === &#x27;undefined&#x27; &amp;&amp; typeof opt === &#x27;function&#x27;) {
+      cb = opt;
+      opt = null;
+    }
+    opt = opt &amp;&amp; _.clone(opt) || {};
+    opt.links = typeof opt.links === &#x27;undefined&#x27; || opt.links;
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (typeof type !== &#x27;string&#x27;) {
+          throw new AnystoreError.MissingArgument(&#x27;missing type&#x27;);
+        }
+        logger.enabledLevels.debug &amp;&amp; log.debug(&#x60;loading ${type} items&#x60;);
+        return this._listOfType(type, opt);
+      })
+      .asCallback(cb);
+  }
+
+  reset(cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        if (typeof this._reset === &#x27;function&#x27;) {
+          return this._reset();
+        }
+        const types = _.map(this.schemas, &#x27;id&#x27;);
+        return Promise.each(types, type =&gt; this.listOfType(type)
+          .then(list =&gt; Promise.map(list, item =&gt; this.delete(type, item.id, {cascade: false})))
+        );
+      })
+      .asCallback(cb);
+  }
+
+  dump(cb) {
+    return Promise.resolve()
+      .then(() =&gt; {
+        const types = _.map(this.schemas, &#x27;id&#x27;);
+        return Promise
+          .reduce(types, (dump, type) =&gt; this.listOfType(type).then(list =&gt; {
+            dump[type] = list;
+            return dump;
+          }), {});
+      })
+      .asCallback(cb);
+  }
+}
+
+for (const fnName of [&#x27;create&#x27;, &#x27;load&#x27;, &#x27;delete&#x27;]) {
+  Anystore.prototype[&#x60;_${fnName}&#x60;] = function() {
+    throw new AnystoreError.NotImplemented(&#x60;method &quot;${fnName}&quot; not implemented&#x60;);
+  };
+}
+
+Anystore.Error = AnystoreError;
+Anystore.patterns = {
+  id: &#x27;^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$&#x27;
+};
+Anystore.idSchema = {
+  type: &#x27;string&#x27;,
+  pattern: Anystore.patterns.id
+};
+Anystore.stores = {};
+Anystore.toStoreName = name =&gt; {
+  const parts = name.match(/^(.*)(-)?[Ss]tore(.js)?$/);
+  if (!parts || !parts[1]) {
+    return;
+  }
+  name = parts[1].substring(0, 1).toUpperCase() + _.camelCase(parts[1].substring(1)) + &#x27;Store&#x27;;
+  return name;
+};
+Anystore.addStore = (store, name) =&gt; {
+  name = name || Anystore.toStoreName(store.name);
+  Anystore.stores[name] = store;
+  logger.enabledLevels.info &amp;&amp; log.info(&#x60;${name} registered&#x60;);
+};
+
+const loadDefaultStores = () =&gt; {
+  const storesDir = path.join(__dirname, &#x27;stores&#x27;);
+  const defaultStoreFiles = fs.readdirSync(storesDir);
+  defaultStoreFiles.forEach(defaultStoreFile =&gt; {
+    const storeName = Anystore.toStoreName(defaultStoreFile);
+    logger.enabledLevels.info &amp;&amp; log.info(&#x60;loading ${storeName}&#x60;);
+    try {
+      const store = require(path.join(storesDir, defaultStoreFile));
+      Anystore.addStore(store, storeName);
+    } catch (err) {
+      logger.enabledLevels.warn &amp;&amp; log.warn(&#x60;error while loading store ${storeName} :&#x60;, err.toString());
+    }
+  });
+};
+
+exports = module.exports = Anystore;
+
+loadDefaultStores();
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

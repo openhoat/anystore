@@ -1,0 +1,17 @@
+{
+  "name": "anystore",
+  "description": "Agnostic data persistence for nodejs",
+  "version": "0.0.1",
+  "url": "https://github.com/openhoat/anystore",
+  "logo": "https://github.com/openhoat/anystore/raw/master/assets/img/datastore-logo.png",
+  "options": {
+    "outdir": "./docs",
+    "linkNatives": "true",
+    "paths": "./lib",
+    "themedir": "node_modules/yuidoc-lucid-theme",
+    "helpers": [
+      "node_modules/yuidoc-lucid-theme/helpers/helpers.js"
+    ]
+  }
+}
+

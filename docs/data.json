@@ -1,0 +1,184 @@
+{
+    "project": {
+        "name": "anystore",
+        "description": "Agnostic data persistence for nodejs",
+        "version": "0.0.1",
+        "url": "https://github.com/openhoat/anystore",
+        "logo": "https://github.com/openhoat/anystore/raw/master/assets/img/datastore-logo.png"
+    },
+    "files": {
+        "docs/assets/vendor/bootstrap/js/bootstrap.min.js": {
+            "name": "docs/assets/vendor/bootstrap/js/bootstrap.min.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "lib/anystore.js": {
+            "name": "lib/anystore.js",
+            "modules": {},
+            "classes": {
+                "Anystore": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "Anystore": {
+            "name": "Anystore",
+            "shortname": "Anystore",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "lib/anystore.js",
+            "line": 15,
+            "description": "Base class of any store.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "opt",
+                    "description": "Anystore options",
+                    "type": "Object",
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "elements": {},
+    "classitems": [
+        {
+            "file": "docs/assets/vendor/bootstrap/js/bootstrap.min.js",
+            "line": 1,
+            "description": "Bootstrap.js by @fat & @mdo\nplugins: bootstrap-transition.js, bootstrap-modal.js, bootstrap-dropdown.js, bootstrap-scrollspy.js, bootstrap-tab.js, bootstrap-tooltip.js, bootstrap-popover.js, bootstrap-affix.js, bootstrap-alert.js, bootstrap-button.js, bootstrap-collapse.js, bootstrap-carousel.js, bootstrap-typeahead.js\nCopyright 2012 Twitter, Inc.\nhttp://www.apache.org/licenses/LICENSE-2.0.txt",
+            "class": "Anystore"
+        },
+        {
+            "file": "lib/anystore.js",
+            "line": 28,
+            "description": "Optionnal initialization.\nUse it to pass optional options to the store implementation, like host, port, ... for example.",
+            "itemtype": "method",
+            "name": "init",
+            "params": [
+                {
+                    "name": "opt",
+                    "description": "Store implementation options",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "true on success",
+                "type": "Boolean"
+            },
+            "class": "Anystore"
+        },
+        {
+            "file": "lib/anystore.js",
+            "line": 44,
+            "description": "Start the store.",
+            "async": 1,
+            "itemtype": "method",
+            "name": "start",
+            "params": [
+                {
+                    "name": "opt",
+                    "description": "Store implementation options",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "cb",
+                    "description": "Callback function",
+                    "type": "Function",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "true on success",
+                "type": "Promise"
+            },
+            "class": "Anystore"
+        },
+        {
+            "file": "lib/anystore.js",
+            "line": 85,
+            "description": "Stop the store.",
+            "async": 1,
+            "itemtype": "method",
+            "name": "stop",
+            "params": [
+                {
+                    "name": "cb",
+                    "description": "Callback function",
+                    "type": "Function",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "true on success",
+                "type": "Promise"
+            },
+            "class": "Anystore"
+        },
+        {
+            "file": "lib/anystore.js",
+            "line": 209,
+            "description": "Get schema relations.",
+            "itemtype": "method",
+            "name": "getSchemaRelations",
+            "return": {
+                "description": "Schema relation",
+                "type": "Object"
+            },
+            "class": "Anystore"
+        },
+        {
+            "file": "lib/anystore.js",
+            "line": 219,
+            "description": "Validate entity data.",
+            "async": 1,
+            "itemtype": "method",
+            "name": "validate",
+            "params": [
+                {
+                    "name": "type",
+                    "description": "Entity type reference",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "Store implementation options",
+                    "type": "Object"
+                },
+                {
+                    "name": "mode",
+                    "description": "Specify operation to use in schema",
+                    "type": "String",
+                    "optional": true,
+                    "optdefault": "create"
+                },
+                {
+                    "name": "cb",
+                    "description": "Callback function",
+                    "type": "Function",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "fails on validation error",
+                "type": "Promise"
+            },
+            "class": "Anystore"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "Missing item type\nBootstrap.js by @fat & @mdo\nplugins: bootstrap-transition.js, bootstrap-modal.js, bootstrap-dropdown.js, bootstrap-scrollspy.js, bootstrap-tab.js, bootstrap-tooltip.js, bootstrap-popover.js, bootstrap-affix.js, bootstrap-alert.js, bootstrap-button.js, bootstrap-collapse.js, bootstrap-carousel.js, bootstrap-typeahead.js\nCopyright 2012 Twitter, Inc.\nhttp://www.apache.org/licenses/LICENSE-2.0.txt",
+            "line": " docs/assets/vendor/bootstrap/js/bootstrap.min.js:1"
+        }
+    ]
+}

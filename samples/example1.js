@@ -2,10 +2,13 @@
 
 const Anystore = require('../lib/anystore');
 
-const store = new Anystore.stores.MemoryStore(); // Default memory store provided for test purpose
+const store = new Anystore.stores.MemoryStore();
 
 store.start()
-  .then(() => store.create('Contact', {username: 'doe', firstname: 'John', lastname: 'Doe'}))
+  .then(() => store.create('Contact', {
+    firstname: 'John',
+    lastname: 'Doe'
+  }))
   .then(data => {
     console.log('saved data :', data);
     return data.id;

@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/openhoat/anystore/badge.svg)](https://coveralls.io/r/openhoat/anystore)
 [![npm](https://img.shields.io/npm/l/express.svg?style=flat-square)]()
 
-![Datastore Logo](assets/datastore-logo.png)
+![Datastore Logo](assets/img/datastore-logo.png)
 
 ## Anystore
 
@@ -55,28 +55,24 @@ store.start()
   .then(() => store.stop());
 ```
 
+Anystore is a base class overriden by every store implementation.
+All available stores classes are exposed with "stores" static attribute.
+
+In this example, the store is an instance of MemoryStore class.
+
 Result :
 
 ```bash
 $ node samples/example1
-INFO  - anystore:520 - 9ms - loading MemoryStore
-INFO  - anystore:512 - 4ms - MemoryStore registered
-INFO  - anystore:520 - 1ms - loading RedisStore
-INFO  - anystore:512 - 164ms - RedisStore registered
-INFO  - anystore:51 - 5ms - MemoryStore sucessfully started
-saved data : { username: 'doe',
-  firstname: 'John',
+saved data : { firstname: 'John',
   lastname: 'Doe',
-  id: 'd8eeec4e-4c20-45ed-8b00-d84ad7f943ee' }
-fetched data back again : { username: 'doe',
-  firstname: 'John',
+  id: '97ff185e-353c-48c8-b13d-f242ae996c84' }
+fetched data back again : { firstname: 'John',
   lastname: 'Doe',
-  id: 'd8eeec4e-4c20-45ed-8b00-d84ad7f943ee' }
-INFO  - anystore:71 - 14ms - MemoryStore closed
+  id: '97ff185e-353c-48c8-b13d-f242ae996c84' }
 ```
 
-Anystore is a base class overriden by every store implementation.
-All available stores classes are exposed with "stores" static attribute.
+The generated ID is a [UUID v4](https://github.com/broofa/node-uuid).
 
 ## Datastore API doc
 
@@ -89,6 +85,35 @@ Almost all provided methods are asynchronous, they accept a callback as last arg
 - start(opt, cb) : start the datastore (and initialize if needed)
 - stop(cb) : stop the datastore
 
+
+### Store features :
+
+All features take a type (collection name) as first argument.
+
+Basic methods :
+
+- create(type, data, cb) : save a new resource to collection
+- load(type, id, cb) : fetch a resource by ID
+- update(type, data, cb) : update the resource of given ID
+- delete(type, id, cb) : delete the resource from the collection
+- list(type, cb) : fetch the resources of collection
+- reset(cb) : remove all datas
+- dump(cb) : retreive all datas
+getSchemaRelations()
+validate(type, data, mode = 'create', cb)
+getIndexes(type, data)
+getLinks(type, data)
+unsetRelations(type, data, cb)
+setRelations(type, data, cb)
+omitLinks(type, data)
+load(type, id, opt, cb)
+create(type, data, opt, cb)
+update(type, data, opt, cb)
+delete(type, id, opt, cb)
+findByIndex(type, indexName, indexValue, cb)
+listOfType(type, opt, cb)
+reset(cb)
+
 #### Options :
 
 TODO
@@ -96,23 +121,6 @@ TODO
 #### Provider specific options :
 
 - Redis : full list of options as defined in [redis.createClient()](https://github.com/mranney/node_redis#overloading)
-
-### Store features :
-
-All features take a collection name as first argument.
-
-CRUD methods :
-
-- create(type, data, cb) : save a new resource to collection
-- load(type, id, cb) : fetch a resource by ID
-- update(type, data, cb) : update the resource of given ID
-- delete(type, id, cb) : delete the resource from the collection
-
-Extra features :
-
-- list(type, cb) : fetch the resources of collection
-- reset(cb) : remove all datas
-- dump(cb) : retreive all datas
 
 ## Databases support
 
