@@ -90,29 +90,17 @@ Almost all provided methods are asynchronous, they accept a callback as last arg
 
 All features take a type (collection name) as first argument.
 
-Basic methods :
+Basic features :
 
-- create(type, data, cb) : save a new resource to collection
-- load(type, id, cb) : fetch a resource by ID
-- update(type, data, cb) : update the resource of given ID
-- delete(type, id, cb) : delete the resource from the collection
-- list(type, cb) : fetch the resources of collection
-- reset(cb) : remove all datas
-- dump(cb) : retreive all datas
-getSchemaRelations()
-validate(type, data, mode = 'create', cb)
-getIndexes(type, data)
-getLinks(type, data)
-unsetRelations(type, data, cb)
-setRelations(type, data, cb)
-omitLinks(type, data)
-load(type, id, opt, cb)
-create(type, data, opt, cb)
-update(type, data, opt, cb)
-delete(type, id, opt, cb)
-findByIndex(type, indexName, indexValue, cb)
-listOfType(type, opt, cb)
-reset(cb)
+- CRUD : create / read / update / delete an entity
+- List all entities of type
+- Find any entity by index (schema required)
+- Dump the store
+- Reset the store
+
+For more information, look at [API doc](https://openhoat.github.io/anystore/)
+
+TODO
 
 #### Options :
 
