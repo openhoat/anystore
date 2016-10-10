@@ -4,13 +4,13 @@
   "description": "Agnostic data persistence for nodejs",
   "main": "lib/anystore.js",
   "scripts": {
-    "clean": "rm -rf ./dist",
+    "clean": "rimraf dist",
     "lint": "eslint .",
     "test": "mocha",
     "cover": "istanbul cover _mocha",
-    "coveralls": "npm run cover -- -- -R spec && cat ./dist/coverage/lcov.info | coveralls && rm -rf ./dist/coverage",
-    "build:doc": "yuidoc -c ./yuidoc.json .",
-    "start:doc": "yuidoc -c ./yuidoc.json --server 3900",
+    "coveralls": "npm run cover -- -- -R spec && cat dist/coverage/lcov.info | coveralls && rm -rf dist/coverage",
+    "build:doc": "yuidoc -c yuidoc.json .",
+    "start:doc": "yuidoc -c yuidoc.json --server 3900",
     "browse:doc": "xdg-open http://localhost:3900/"
   },
   "author": "Olivier Penhoat <openhoat@gmail.com> (http://headwood.net/)",
@@ -44,6 +44,7 @@
     "istanbul": "0.4.5",
     "mocha": "3.1.0",
     "mocha-lcov-reporter": "1.2.0",
+    "rimraf": "2.5.4",
     "yuidoc-lucid-theme": "0.1.2",
     "yuidocjs": "0.10.2"
   },
