@@ -6,7 +6,9 @@
   "scripts": {
     "clean": "rm -rf ./dist",
     "lint": "eslint .",
-    "test": "istanbul test _mocha -- -R spec && cat ./dist/coverage/lcov.info | coveralls && rm -rf ./dist/coverage",
+    "test": "mocha",
+    "cover": "istanbul cover _mocha",
+    "coveralls": "istanbul cover _mocha -- -R spec && cat ./dist/coverage/lcov.info | coveralls && rm -rf ./dist/coverage",
     "build:doc": "yuidoc -c ./yuidoc.json .",
     "start:doc": "yuidoc -c ./yuidoc.json --server 3900",
     "browse:doc": "xdg-open http://localhost:3900/"

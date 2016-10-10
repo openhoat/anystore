@@ -8,10 +8,4 @@ before_script:
   - npm prune
   - npm install
 
-script: npm test --coverage
-
-deploy:
-  provider: npm
-  email: openhoat@gmail.com
-  api_key:
-    secure: FJw70aV8KNBd6EKL+74jWvDBABov3u9SSYV6VpCuQ6zMw56FRzvDfiPxQBewrnerUu3GjuNi9sosYuB3Kr9bCADBb2Z9kMxiLYd8saLGGPyHW11HyVnbIDPdqA11JFkqFK6YPHd3I6IdsVYxOCMNqgEF55Vz9wXHBz8D1Hd43jcAHIJRSdvt2sFpzqIACRUBDyaZTVINrwOWKM3l9sqq3DHgwgpT/VclnqGfgciYhWpI3fMhl2i4UyoOn+eMNbYxqaVdHuIm08WgZoEZbr8DHPSLXOndShm8+7ViV9LDe2p/5A9f37Q/l1JB02X0XsH3XO7i2o0/j7y/AiKQfkA9q4k0BZc//ymLfYrk7PY4s8+bfBerBvXpwKlnYPRQq2bVQH0QC7I0x+vxY3VmKZx2Af9YjirSrkiZUah0opvy7MZcQuqB4Tn/BfOKDSmJjq7TQxvIci+ioTvNMxtJ6v5oyZyobcnApl1lbpiole8gvdTyehdbmUiQ85SwUWFqEH7G+fkOZJqFaz8lr8VW4V5wZ2A19QTYMp/t2DDtQyEG11sPcUfOuKQMkL0bYnBQViuNp78svDhCB5WzEo4bqW6JKPV0kAXCdww9AdaXvqcQIO7IpVVPobQpewK6nQSyErc+lwXeEkzhHeWQAOxEaed9/sLGMlxld9Gj89rQjLdXYoY=
+script: npm run coveralls
